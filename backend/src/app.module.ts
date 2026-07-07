@@ -13,7 +13,7 @@ import { UserSetting } from './upload/entities/user-setting.entity';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'sqljs',
-      location: 'database.sqlite',
+      location: 'data/database.sqlite',
       autoSave: true,
       entities: [MediaItem, UserSetting],
       synchronize: true, // Tự động tạo bảng dựa trên entity (chỉ dùng cho dev)

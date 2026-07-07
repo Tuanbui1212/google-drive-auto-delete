@@ -53,6 +53,10 @@ This project is fully dockerized. You just need to configure the environment var
 4. **Access the Application:**
    - Open your browser and go to `http://localhost:3000`
 
+## Data Persistence
+
+The backend uses SQLite to store configurations (like auto-delete delay) and currently tracked photos. This database is automatically saved to the `backend-data` folder on your host machine via Docker Volumes. This ensures that your settings and pending deletion tasks are not lost if the Docker container is restarted.
+
 ## Stopping the Application
 
 To stop the containers, run:
@@ -63,5 +67,5 @@ docker-compose down
 ## Tech Stack
 
 - **Frontend:** Next.js (React), Tailwind CSS
-- **Backend:** NestJS (Node.js), TypeScript, TypeORM, SQLite (In-memory)
+- **Backend:** NestJS (Node.js), TypeScript, TypeORM, SQLite (Persistent)
 - **Deployment:** Docker & Docker Compose

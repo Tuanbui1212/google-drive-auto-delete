@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
 import { UploadModule } from './upload/upload.module';
-import { CronModule } from './cron/cron.module';
 import { MediaItem } from './upload/entities/media-item.entity';
-import { UserSetting } from './upload/entities/user-setting.entity';
+import { UserSession } from './auth/entities/user-session.entity';
 
 @Module({
   imports: [
@@ -15,15 +13,13 @@ import { UserSetting } from './upload/entities/user-setting.entity';
       type: 'sqljs',
       location: 'data/database.sqlite',
       autoSave: true,
-      entities: [MediaItem, UserSetting],
-      synchronize: true, // Tự động tạo bảng dựa trên entity (chỉ dùng cho dev)
+      entities: [MediaItem, UserSession],
+      synchronize: true,
     }),
-    ScheduleModule.forRoot(),
     AuthModule,
     UploadModule,
-    CronModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

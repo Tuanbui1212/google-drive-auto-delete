@@ -1,11 +1,24 @@
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Delete,
+  Req,
+  Res,
+  UseGuards,
+  Query,
+  UnauthorizedException,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private authService: AuthService,
+  ) {}
 
   @Get('google')
   @UseGuards(GoogleAuthGuard)
@@ -15,21 +28,38 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
     const user: any = req.user;
-    
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
-    
-    // Đóng gói thông tin user truyền qua query (Cần encodeURIComponent để an toàn)
+    const session = await this.authService.createSession(user);
+
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
+
     const qs = new URLSearchParams({
       login: 'success',
-      token: user.accessToken,
-      email: user.email,
-      name: user.firstName + ' ' + user.lastName,
-      picture: user.picture
+      sessionId: session.id,
+      email: session.email,
+      name: session.name,
+      picture: session.picture || '',
     }).toString();
 
     return res.redirect(`${frontendUrl}?${qs}`);
   }
-}
 
+  @Get('session')
+  async validateSession(@Query('sessionId') sessionId: string) {
+    if (!sessionId) {
+      throw new UnauthorizedException('Thiếu sessionId');
+    }
+
+    return this.authService.validateSession(sessionId);
+  }
+
+  @Delete('session')
+  async logout(@Query('sessionId') sessionId: string) {
+    if (sessionId) {
+      await this.authService.revokeSession(sessionId);
+    }
+    return { success: true };
+  }
+}

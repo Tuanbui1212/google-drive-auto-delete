@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
 
 @Entity('media_items')
 export class MediaItem {
@@ -6,20 +6,20 @@ export class MediaItem {
   id: number;
 
   @Column()
-  email: string; // Phân biệt người dùng
+  email: string;
 
   @Column()
-  fileName: string; // Tên gốc của ảnh
+  fileName: string;
 
   @Column()
-  fileId: string; // ID của file trên Google Drive
+  mediaItemId: string;
 
-  @Column({ nullable: true })
-  thumbnailLink: string; // Đường dẫn ảnh thu nhỏ từ Google Drive
+  @Column({ type: 'varchar', nullable: true })
+  baseUrl: string | null;
 
-  @Column()
-  accessToken: string; // Token để có quyền xóa file này
+  @Column({ type: 'varchar', nullable: true })
+  productUrl: string | null;
 
-  @Column()
-  deleteAt: Date; // Thời điểm cần xóa (thường là hiện tại + 5 phút)
+  @CreateDateColumn()
+  createdAt: Date;
 }

@@ -10,7 +10,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientID: configService.get<string>('GOOGLE_CLIENT_ID') || 'placeholder',
       clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET') || 'placeholder',
       callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL') || 'http://localhost:5000/auth/google/callback',
-      scope: ['email', 'profile', 'https://www.googleapis.com/auth/drive.file'],
+      scope: [
+        'email',
+        'profile',
+        'https://www.googleapis.com/auth/photoslibrary.appendonly',
+        'https://www.googleapis.com/auth/photoslibrary.readonly',
+      ],
     });
   }
 
@@ -27,7 +32,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       lastName: name.familyName,
       picture: photos[0].value,
       accessToken,
-      refreshToken, // Quan trọng: Dùng để upload file lên Drive
+      refreshToken,
     };
     done(null, user);
   }

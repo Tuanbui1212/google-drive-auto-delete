@@ -6,7 +6,11 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "${BACKEND_PORT:-5000}:${BACKEND_PORT:-5000}"
+    environment:
+      STRICT_PORT: "true"
+      PORT: ${BACKEND_PORT:-5000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
     env_file:
       - ./backend/.env
     volumes:
@@ -18,7 +22,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT:-3001}:3000"
     env_file:
       - ./frontend/.env
     restart: always

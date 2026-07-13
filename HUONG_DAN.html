@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hướng dẫn nhanh</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f0f4f8;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 32px 28px 48px;
+    }
+    .wrap {
+      width: 100%;
+      max-width: none;
+      margin: 0 auto;
+    }
+
+    .top {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .top h1 { font-size: 2rem; margin-bottom: 12px; }
+    .chrome-only {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 2px solid #4285f4;
+      color: #1a56c4;
+      padding: 12px 28px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+    @media (max-width: 900px) {
+      .cards { grid-template-columns: 1fr; }
+      body { padding: 24px 16px 40px; }
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 26px;
+      min-height: 480px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+      border-top: 6px solid #ccc;
+      display: flex;
+      flex-direction: column;
+    }
+    .card.first { border-top-color: #ea4335; }
+    .card.daily { border-top-color: #34a853; }
+    .card.other { border-top-color: #f9ab00; }
+
+    .card-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    .card h2 {
+      font-size: 1.35rem;
+      margin-bottom: 18px;
+      line-height: 1.3;
+    }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      background: #e8eef5;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 28px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .file {
+      display: block;
+      background: #1e293b;
+      color: #7dd3fc;
+      font-family: Consolas, monospace;
+      font-size: 0.95rem;
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin: 8px 0 12px;
+      word-break: break-all;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+      text-align: left;
+    }
+    .file:hover { background: #334155; }
+
+    .note {
+      margin-top: auto;
+      padding-top: 14px;
+      font-size: 0.9rem;
+      color: #666;
+      border-top: 1px solid #eee;
+      line-height: 1.5;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #4285f4;
+      color: #fff;
+    }
+    .btn:hover { background: #3367d6; }
+    .btn.outline {
+      background: #fff;
+      color: #4285f4;
+      border: 2px solid #4285f4;
+    }
+    .btn.outline:hover { background: #e8f0fe; }
+
+    .docker-pick {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin: 10px 0 14px;
+    }
+    .pick {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 2px solid #4285f4;
+      background: #e8f0fe;
+      font-size: 0.92rem;
+      line-height: 1.35;
+    }
+    .pick strong { display: block; font-size: 0.95rem; }
+    .pick span { color: #555; font-size: 0.85rem; }
+    .pick-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #4285f4;
+      margin-bottom: 6px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1e293b;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: all .3s;
+      pointer-events: none;
+      z-index: 9;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <h1>Google Photos Tool</h1>
+      <div class="chrome-only">Chỉ dùng Google Chrome — không dùng Firefox</div>
+    </div>
+
+    <div class="cards">
+
+      <!-- LẦN ĐẦU -->
+      <div class="card first">
+        <div class="card-tag">Chỉ làm 1 lần</div>
+        <h2>Lần đầu cài</h2>
+
+        <div class="step">
+          <span class="step-num">1</span>
+          <span>Cài <strong>Docker Desktop</strong> → mở → đợi chạy xong</span>
+        </div>
+        <button class="btn outline" data-open="https://www.docker.com/products/docker-desktop/">Tải Docker</button>
+
+        <div class="pick-label">Bấm Download → chọn:</div>
+        <div class="docker-pick">
+          <div class="pick">
+            <div>
+              <strong>Windows — AMD64</strong>
+              <span>Chọn bản này</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <span class="step-num">2</span>
+          <span>Double-click file:</span>
+        </div>
+        <button class="file" data-copy="CHAY_UNG_DUNG.bat">CHAY_UNG_DUNG.bat</button>
+        <div class="note">Lần đầu chờ 5–15 phút. Dùng <strong>Chrome</strong> đăng nhập Google. Có cảnh báo → bấm <strong>Nâng cao</strong> → <strong>Truy cập</strong>.</div>
+
+        <div class="step">
+          <span class="step-num">3</span>
+          <span>Cài extension trong <strong>Chrome</strong>:</span>
+        </div>
+        <button class="btn" data-open="chrome://extensions">Mở chrome://extensions</button>
+        <div class="step" style="margin-top:10px;font-size:0.85rem">
+          Bật <strong>Chế độ nhà phát triển</strong> → <strong>Tải tiện ích đã giải nén</strong> → chọn folder <strong>extension</strong>
+        </div>
+        <div class="note">Extension: API = <code>http://localhost:5000</code> → bật <strong>Tự động xóa</strong> → Lưu</div>
+      </div>
+
+      <!-- MỖI NGÀY -->
+      <div class="card daily">
+        <div class="card-tag">Mỗi ngày</div>
+        <h2>Mở app hôm nay</h2>
+
+        <div class="step">
+          <span class="step-num">1</span>
+          <span>Mở <strong>Docker Desktop</strong></span>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <span>Double-click:</span>
+        </div>
+        <button class="file" data-copy="CHAY_UNG_DUNG.bat">CHAY_UNG_DUNG.bat</button>
+        <div class="step">
+          <span class="step-num">3</span>
+          <span>Upload ảnh trên <strong>Chrome</strong></span>
+        </div>
+        <button class="btn" data-open="http://localhost:3001">Mở web (Chrome)</button>
+        <div class="note">Giữ <strong>Chrome mở</strong> → ảnh tự xóa sau 5 phút</div>
+      </div>
+
+      <!-- TẮT / KHÁC -->
+      <div class="card other">
+        <div class="card-tag">Khác</div>
+        <h2>Tắt & mở lại</h2>
+
+        <p style="font-size:0.92rem;margin-bottom:10px"><strong>Tắt app:</strong></p>
+        <button class="file" data-copy="TAT_UNG_DUNG.bat">TAT_UNG_DUNG.bat</button>
+
+        <p style="font-size:0.92rem;margin:14px 0 10px"><strong>App đang chạy, chỉ mở web:</strong></p>
+        <button class="file" data-copy="MO_WEB.bat">MO_WEB.bat</button>
+        <button class="btn outline" data-open="http://localhost:3001">Hoặc mở Chrome → localhost:3001</button>
+
+        <div class="note" style="margin-top:16px">
+          <strong>Lỗi?</strong><br>
+          Docker chưa mở → mở Docker, chạy lại BAT<br>
+          Ảnh không xóa → kiểm tra extension + Chrome đang mở
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const toast = document.getElementById("toast");
+    let toastTimer;
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function openInChrome(url) {
+      if (url.startsWith("chrome://")) {
+        showToast("Dán vào thanh địa chỉ Chrome rồi Enter");
+        copyText(url);
+        return;
+      }
+      window.open(url, "_blank");
+      showToast("Nếu mở Firefox → đóng lại, mở bằng Chrome");
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).catch(() => {
+        const t = document.createElement("textarea");
+        t.value = text;
+        document.body.appendChild(t);
+        t.select();
+        document.execCommand("copy");
+        document.body.removeChild(t);
+      });
+    }
+
+    document.querySelectorAll("[data-copy]").forEach((el) => {
+      el.addEventListener("click", () => {
+        copyText(el.dataset.copy || el.textContent.trim());
+        showToast("Đã copy tên file — tìm trong folder project");
+      });
+    });
+
+    document.querySelectorAll("[data-open]").forEach((el) => {
+      el.addEventListener("click", () => openInChrome(el.dataset.open));
+    });
+  </script>
+</body>
+</html>

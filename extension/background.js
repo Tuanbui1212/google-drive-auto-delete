@@ -69,6 +69,29 @@ async function removeLocalRecord(apiUrl, email, photoId) {
   }
 }
 
+async function removeLocalRecordSafe(apiUrl, email, photoId) {
+  try {
+    await removeLocalRecord(apiUrl, email, photoId);
+  } catch (err) {
+    if (/404|không tồn tại|not found/i.test(err.message)) return;
+    throw err;
+  }
+}
+
+async function applyDeleteResult(apiUrl, email, photo, result) {
+  if (result?.success) {
+    await removeLocalRecordSafe(apiUrl, email, photo.id);
+    return "deleted";
+  }
+
+  if (result?.orphan) {
+    await removeLocalRecordSafe(apiUrl, email, photo.id);
+    return "orphan";
+  }
+
+  throw new Error(result?.error || "Lỗi không xác định khi bấm xóa");
+}
+
 async function sendProgressToWebApp(message) {
   // Find the Web App tab to send the event back
   const tabs = await chrome.tabs.query({
@@ -171,12 +194,7 @@ async function startDeleteAll(apiUrl, email, options = {}) {
           action: "DELETE_CURRENT_PHOTO",
         });
 
-        if (!result?.success) {
-          throw new Error(result?.error || "Lỗi không xác định khi bấm xóa");
-        }
-
-        // Remove from DB if UI deletion succeeded
-        await removeLocalRecord(apiUrl, email, photo.id);
+        await applyDeleteResult(apiUrl, email, photo, result);
         deletedCount++;
       } catch (err) {
         errors.push(`${photo.fileName || photo.id}: ${err.message}`);
@@ -244,6 +262,37 @@ async function syncAutoDeleteAlarm() {
   }
 }
 
+async function deleteExpiredBatch(tab, apiUrl, email, expired) {
+  let batchDeleted = 0;
+
+  for (const photo of expired) {
+    const url = buildPhotoUrl(photo);
+    if (!url) continue;
+
+    try {
+      await chrome.tabs.update(tab.id, { url });
+      await waitTabLoad(tab.id);
+      await ensureContentScript(tab.id);
+
+      const result = await chrome.tabs.sendMessage(tab.id, {
+        action: "DELETE_CURRENT_PHOTO",
+      });
+
+      const kind = await applyDeleteResult(apiUrl, email, photo, result);
+      batchDeleted++;
+      if (kind === "orphan") {
+        console.log(
+          `[Auto-Delete] ${photo.fileName}: đã dọn DB (ảnh không còn trên Google)`,
+        );
+      }
+    } catch (err) {
+      console.warn(`[Auto-Delete] ${photo.fileName}: ${err.message}`);
+    }
+  }
+
+  return batchDeleted;
+}
+
 async function runAutoDelete() {
   if (deleting) return; // skip if already running a manual delete
 
@@ -259,21 +308,19 @@ async function runAutoDelete() {
 
   for (const [email, settings] of enabledAccounts) {
     const delayMinutes = Number(settings.delayMinutes) || 5;
+    let win = null;
+    let startedDelete = false;
 
     try {
-      const photos = await fetchPhotos(apiUrl, email);
-      const expired = filterExpiredPhotos(photos, delayMinutes);
+      let photos = await fetchPhotos(apiUrl, email);
+      let expired = filterExpiredPhotos(photos, delayMinutes);
 
       if (expired.length === 0) continue;
 
-      console.log(
-        `[Auto-Delete] ${email}: ${expired.length} ảnh quá hạn, bắt đầu xóa...`,
-      );
-
       deleting = true;
+      startedDelete = true;
 
-      // Open a minimized popup window for silent deletion
-      const win = await chrome.windows.create({
+      win = await chrome.windows.create({
         url: "https://photos.google.com/",
         type: "popup",
         state: "minimized",
@@ -285,52 +332,58 @@ async function runAutoDelete() {
       await ensureContentScript(tab.id);
 
       let deletedCount = 0;
+      let round = 0;
 
-      for (const photo of expired) {
-        const url = buildPhotoUrl(photo);
-        try {
-          await chrome.tabs.update(tab.id, { url });
-          await waitTabLoad(tab.id);
-          await ensureContentScript(tab.id);
+      while (expired.length > 0) {
+        round++;
+        console.log(
+          `[Auto-Delete] ${email}: vòng ${round}, ${expired.length} ảnh quá hạn`,
+        );
 
-          const result = await chrome.tabs.sendMessage(tab.id, {
-            action: "DELETE_CURRENT_PHOTO",
-          });
+        const batchDeleted = await deleteExpiredBatch(
+          tab,
+          apiUrl,
+          email,
+          expired,
+        );
+        deletedCount += batchDeleted;
 
-          if (result?.success) {
-            await removeLocalRecord(apiUrl, email, photo.id);
-            deletedCount++;
-          }
-        } catch (err) {
-          console.error(`[Auto-Delete] ${photo.fileName}: ${err.message}`);
+        if (batchDeleted === 0) {
+          console.warn(
+            `[Auto-Delete] ${email}: không xóa được ảnh nào trong vòng ${round}, dừng vòng lặp`,
+          );
+          break;
         }
+
+        photos = await fetchPhotos(apiUrl, email);
+        expired = filterExpiredPhotos(photos, delayMinutes);
       }
 
-      // Close the popup window
-      try {
-        await chrome.windows.remove(win.id);
-      } catch (e) {}
-
-      // Save last run info
       const local = await chrome.storage.local.get("lastAutoRun");
       const lastAutoRun = local.lastAutoRun || {};
       lastAutoRun[email] = {
         at: new Date().toISOString(),
         deleted: deletedCount,
-        total: expired.length,
+        rounds: round,
       };
       await chrome.storage.local.set({ lastAutoRun });
 
       if (deletedCount > 0) {
         console.log(
-          `[Auto-Delete] ${email}: đã xóa ${deletedCount}/${expired.length} ảnh`,
+          `[Auto-Delete] ${email}: hoàn tất ${round} vòng, đã xóa ${deletedCount} ảnh`,
         );
       }
-
-      deleting = false;
     } catch (error) {
       console.error(`[Auto-Delete] ${email}: ${error.message}`);
-      deleting = false;
+    } finally {
+      if (win) {
+        try {
+          await chrome.windows.remove(win.id);
+        } catch (e) {}
+      }
+      if (startedDelete) {
+        deleting = false;
+      }
     }
   }
 }

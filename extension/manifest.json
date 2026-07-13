@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Google Photos Delete Helper",
-  "version": "1.4.0",
+  "version": "1.4.2",
   "description": "Tự động xóa ảnh đã upload sau 5 phút — dùng session Google Photos trong Chrome",
   "permissions": ["storage", "tabs", "scripting", "alarms"],
   "host_permissions": [

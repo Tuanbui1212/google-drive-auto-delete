@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
@@ -13,17 +13,34 @@
         không cần bấm tay mỗi lần.
       </p>
 
-      <div id="accountBanner" class="account-banner">Đang nhận diện tài khoản...</div>
+      <div id="accountBanner" class="account-banner">
+        Đang nhận diện tài khoản...
+      </div>
 
       <label for="apiUrl">Backend API</label>
       <input id="apiUrl" type="text" placeholder="http://localhost:5000" />
 
       <label for="email">Tài khoản Google Photos</label>
       <div class="email-row">
-        <input id="email" type="email" placeholder="Mở photos.google.com để tự nhận diện" readonly />
-        <button id="refreshAccountBtn" type="button" class="icon-btn" title="Nhận diện lại">↻</button>
+        <input
+          id="email"
+          type="email"
+          placeholder="Mở photos.google.com để tự nhận diện"
+          readonly
+        />
+        <button
+          id="refreshAccountBtn"
+          type="button"
+          class="icon-btn"
+          title="Nhận diện lại"
+        >
+          ↻
+        </button>
       </div>
-      <p class="email-hint">Tự động lấy email từ tab Google Photos đang mở. Đổi nick trên Photos → bấm ↻</p>
+      <p class="email-hint">
+        Tự động lấy email từ tab Google Photos đang mở. Đổi nick trên Photos →
+        bấm ↻
+      </p>
 
       <div id="photoStats" class="photo-stats">Đang tải danh sách...</div>
 
@@ -31,13 +48,7 @@
         <label class="toggle-row">
           <input id="autoDeleteEnabled" type="checkbox" />
           <span>Tự động xóa sau</span>
-          <input
-            id="delayMinutes"
-            type="number"
-            min="1"
-            max="1440"
-            value="5"
-          />
+          <input id="delayMinutes" type="number" min="1" max="1440" value="5" />
           <span>phút</span>
         </label>
         <p id="autoStatus" class="auto-status">Tự động xóa: tắt</p>

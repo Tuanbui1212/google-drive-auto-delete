@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { MediaItem } from './entities/media-item.entity';
+import { UploadGateway } from './upload.gateway';
 
 const PHOTOS_API_BASE = 'https://photoslibrary.googleapis.com/v1';
 
@@ -16,6 +17,7 @@ export class UploadService {
     @InjectRepository(MediaItem)
     private mediaItemRepo: Repository<MediaItem>,
     private configService: ConfigService,
+    private uploadGateway: UploadGateway,
   ) { }
 
   private getApiBaseUrl(): string {
@@ -167,9 +169,16 @@ export class UploadService {
   private async fetchMediaItemDetailsBatch(
     mediaItemIds: string[],
     accessToken: string,
-  ): Promise<Map<string, { baseUrl?: string; productUrl?: string }>> {
-    const result = new Map<string, { baseUrl?: string; productUrl?: string }>();
-    if (mediaItemIds.length === 0) return result;
+  ): Promise<{
+    found: Map<string, { baseUrl?: string; productUrl?: string }>;
+    missingIds: string[];
+    apiOk: boolean;
+  }> {
+    const found = new Map<string, { baseUrl?: string; productUrl?: string }>();
+    const missingIds: string[] = [];
+    if (mediaItemIds.length === 0) {
+      return { found, missingIds, apiOk: true };
+    }
 
     const params = new URLSearchParams();
     for (const id of mediaItemIds) {
@@ -185,36 +194,60 @@ export class UploadService {
     const body = await response.text();
     if (!response.ok) {
       this.logger.warn(`batchGet failed (${response.status}): ${body}`);
-      return result;
+      return { found, missingIds, apiOk: false };
     }
 
     const data = JSON.parse(body);
-    for (const entry of data?.mediaItemResults || []) {
+    const results = data?.mediaItemResults || [];
+
+    for (let i = 0; i < mediaItemIds.length; i += 1) {
+      const requestedId = mediaItemIds[i];
+      const entry = results[i];
       const mediaItem = entry?.mediaItem;
-      if (mediaItem?.id) {
-        result.set(mediaItem.id, {
+
+      if (mediaItem?.id && mediaItem.baseUrl) {
+        found.set(requestedId, {
           baseUrl: mediaItem.baseUrl,
           productUrl: mediaItem.productUrl,
         });
+      } else {
+        missingIds.push(requestedId);
       }
     }
 
-    return result;
+    return { found, missingIds, apiOk: true };
   }
 
-  private async refreshMediaUrls(
+  /** Đồng bộ DB với Google: refresh URL + xóa bản ghi không còn trên Photos */
+  private async syncMediaItemsWithGoogle(
     items: MediaItem[],
     accessToken: string,
-  ): Promise<void> {
+  ): Promise<{ items: MediaItem[]; removedCount: number }> {
     const ids = [...new Set(items.map((item) => item.mediaItemId))];
     const chunkSize = 50;
+    const toRemove: MediaItem[] = [];
 
     for (let i = 0; i < ids.length; i += chunkSize) {
       const chunkIds = ids.slice(i, i + chunkSize);
-      const detailsMap = await this.fetchMediaItemDetailsBatch(chunkIds, accessToken);
+      const { found, missingIds, apiOk } = await this.fetchMediaItemDetailsBatch(
+        chunkIds,
+        accessToken,
+      );
 
-      for (const item of items) {
-        const details = detailsMap.get(item.mediaItemId);
+      if (!apiOk) {
+        continue;
+      }
+
+      const missingSet = new Set(missingIds);
+      const chunkItems = items.filter((item) => chunkIds.includes(item.mediaItemId));
+
+      for (const item of chunkItems) {
+        if (missingSet.has(item.mediaItemId)) {
+          toRemove.push(item);
+          continue;
+        }
+
+        const details = found.get(item.mediaItemId);
         if (!details?.baseUrl) continue;
 
         item.baseUrl = details.baseUrl;
@@ -222,6 +255,18 @@ export class UploadService {
         await this.mediaItemRepo.save(item);
       }
     }
+
+    if (toRemove.length > 0) {
+      await this.mediaItemRepo.remove(toRemove);
+      this.logger.log(
+        `Đã dọn ${toRemove.length} bản ghi không còn trên Google Photos`,
+      );
+    }
+
+    const removedIds = new Set(toRemove.map((item) => item.id));
+    const remaining = items.filter((item) => !removedIds.has(item.id));
+
+    return { items: remaining, removedCount: toRemove.length };
   }
 
   private async performUpload(
@@ -243,8 +288,8 @@ export class UploadService {
     let productUrl: string | null = created.productUrl || this.buildProductUrl(created.id);
 
     if (!baseUrl) {
-      const detailsMap = await this.fetchMediaItemDetailsBatch([created.id], accessToken);
-      const details = detailsMap.get(created.id);
+      const { found } = await this.fetchMediaItemDetailsBatch([created.id], accessToken);
+      const details = found.get(created.id);
       baseUrl = details?.baseUrl || null;
       productUrl = productUrl || details?.productUrl || null;
     }
@@ -290,7 +335,7 @@ export class UploadService {
   }
 
   async getMyFiles(email: string, accessToken?: string) {
-    const items = await this.mediaItemRepo.find({
+    let items = await this.mediaItemRepo.find({
       where: { email },
       order: { createdAt: 'DESC' },
     });
@@ -316,9 +361,14 @@ export class UploadService {
     }
 
     try {
-      await this.refreshMediaUrls(items, accessToken);
+      const sync = await this.syncMediaItemsWithGoogle(items, accessToken);
+      items = sync.items;
+
+      if (sync.removedCount > 0) {
+        this.uploadGateway.emitFilesUpdated(email);
+      }
     } catch (error: any) {
-      this.logger.warn(`Không refresh được thumbnail: ${error.message}`);
+      this.logger.warn(`Không đồng bộ được với Google Photos: ${error.message}`);
     }
 
     return items.map((item) => mapItem(item));

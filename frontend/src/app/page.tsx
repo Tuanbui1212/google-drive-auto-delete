@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { io } from 'socket.io-client';
+import ThemeToggle from '@/components/ThemeToggle';
 import {
   clearStoredSession,
   getStoredSession,
@@ -75,21 +76,21 @@ function AppModalDialog({
       onClick={onClose}
     >
       <div
-        className={`w-full max-w-md rounded-2xl bg-white shadow-2xl border ${styles.border}`}
+        className={`w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 shadow-2xl border ${styles.border} dark:border-gray-700`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
           <div className="flex items-start gap-3">
             <div className="mt-0.5">{styles.icon}</div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900">{modal.title}</h3>
-              <p className="mt-2 text-sm text-gray-600 whitespace-pre-wrap leading-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{modal.title}</h3>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-6">
                 {modal.message}
               </p>
             </div>
           </div>
         </div>
-        <div className="flex justify-end border-t border-gray-100 px-6 py-4">
+        <div className="flex justify-end border-t border-gray-100 dark:border-gray-800 px-6 py-4">
           <button
             onClick={onClose}
             className={`${styles.button} text-white px-5 py-2 rounded-full text-sm font-medium transition-colors`}
@@ -361,7 +362,7 @@ function PhotosApp() {
 
   if (sessionChecking) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center font-sans text-gray-500">
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center font-sans text-gray-500 dark:text-gray-400">
         <svg className="w-10 h-10 mb-4 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -373,12 +374,15 @@ function PhotosApp() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center font-sans">
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center font-sans relative">
+        <div className="absolute top-6 right-6">
+          <ThemeToggle />
+        </div>
         <svg className="w-20 h-20 mb-6 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
         </svg>
-        <h1 className="text-4xl font-normal text-gray-800 mb-2 tracking-tight">Google Photos</h1>
-        <p className="text-gray-500 mb-8 text-lg">Upload và xem ảnh trên Google Photos của bạn.</p>
+        <h1 className="text-4xl font-normal text-gray-800 dark:text-gray-100 mb-2 tracking-tight">Google Photos</h1>
+        <p className="text-gray-500 dark:text-gray-400 mb-8 text-lg">Upload và xem ảnh trên Google Photos của bạn.</p>
         <button
           onClick={handleLogin}
           className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-medium transition-colors shadow-sm"
@@ -436,17 +440,17 @@ function PhotosApp() {
         </div>
       )}
 
-      <div className="flex h-screen bg-white text-gray-800 font-sans" onDragEnter={handleDrag}>
+      <div className="flex h-screen bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-100 font-sans" onDragEnter={handleDrag}>
 
-        <aside className="w-64 flex-shrink-0 border-r border-gray-100 flex flex-col hidden md:flex">
+        <aside className="w-64 flex-shrink-0 border-r border-gray-100 dark:border-gray-800 flex flex-col hidden md:flex">
           <div className="h-16 flex items-center px-6 gap-2">
             <svg className="w-8 h-8 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
             </svg>
-            <span className="text-xl font-normal text-gray-600 tracking-tight">Photos</span>
+            <span className="text-xl font-normal text-gray-600 dark:text-gray-300 tracking-tight">Photos</span>
           </div>
           <nav className="flex-1 pt-4 pr-4">
-            <div className="bg-[#e8f0fe] text-blue-700 font-medium px-6 py-3 rounded-r-full cursor-pointer flex items-center gap-4">
+            <div className="bg-[#e8f0fe] dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-medium px-6 py-3 rounded-r-full cursor-pointer flex items-center gap-4">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               My Photos
             </div>
@@ -457,13 +461,14 @@ function PhotosApp() {
 
           <header className="h-16 flex items-center justify-between px-6">
             <div className="flex-1 max-w-2xl hidden md:block">
-              <div className="bg-gray-100/80 rounded-lg px-4 py-3 flex items-center gap-3">
-                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                <span className="text-gray-500 font-medium">Ảnh đã upload qua ứng dụng</span>
+              <div className="bg-gray-100/80 dark:bg-gray-800/80 rounded-lg px-4 py-3 flex items-center gap-3">
+                <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <span className="text-gray-500 dark:text-gray-400 font-medium">Ảnh đã upload qua ứng dụng</span>
               </div>
             </div>
 
               <div className="flex flex-1 justify-end items-center gap-4">
+                <ThemeToggle />
                 <input
                   type="file"
                   accept="image/*"
@@ -477,23 +482,23 @@ function PhotosApp() {
                   disabled={uploading}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${
                     uploading
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-[#e8f0fe] hover:bg-[#d2e3fc] text-blue-700'
+                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
+                      : 'bg-[#e8f0fe] dark:bg-blue-950 hover:bg-[#d2e3fc] dark:hover:bg-blue-900 text-blue-700 dark:text-blue-300'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                   Upload
                 </button>
 
-              <div className="w-px h-8 bg-gray-200 mx-2"></div>
+              <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-2"></div>
 
               <div className="relative group cursor-pointer">
-                <img src={user.picture} alt="Avatar" className="w-9 h-9 rounded-full border border-gray-200" referrerPolicy="no-referrer" />
+                <img src={user.picture} alt="Avatar" className="w-9 h-9 rounded-full border border-gray-200 dark:border-gray-700" referrerPolicy="no-referrer" />
                 <div className="absolute right-0 top-full pt-2 hidden group-hover:block z-50 w-64">
-                  <div className="bg-white shadow-lg border border-gray-100 rounded-xl p-4">
-                    <p className="font-medium text-gray-800">{user.name}</p>
-                    <p className="text-sm text-gray-500 mb-4">{user.email}</p>
-                    <button onClick={handleLogout} className="w-full text-center py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium text-gray-700">Sign out</button>
+                  <div className="bg-white dark:bg-gray-900 shadow-lg border border-gray-100 dark:border-gray-800 rounded-xl p-4">
+                    <p className="font-medium text-gray-800 dark:text-gray-100">{user.name}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{user.email}</p>
+                    <button onClick={handleLogout} className="w-full text-center py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 font-medium text-gray-700 dark:text-gray-200">Sign out</button>
                   </div>
                 </div>
               </div>
@@ -509,7 +514,7 @@ function PhotosApp() {
           >
             {dragActive && (
               <div className="absolute inset-0 z-40 bg-blue-500/10 backdrop-blur-[2px] border-4 border-blue-400 border-dashed m-4 rounded-2xl flex items-center justify-center">
-                <div className="bg-white px-8 py-4 rounded-full shadow-lg flex items-center gap-3 text-blue-600 font-semibold text-lg">
+                <div className="bg-white dark:bg-gray-900 px-8 py-4 rounded-full shadow-lg flex items-center gap-3 text-blue-600 dark:text-blue-400 font-semibold text-lg">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                   Thả ảnh vào đây
                 </div>
@@ -517,24 +522,24 @@ function PhotosApp() {
             )}
 
             {loadingFiles ? (
-              <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400">
+              <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400 dark:text-gray-500">
                 <svg className="w-10 h-10 mb-4 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <p className="text-sm text-gray-500">Đang tải ảnh từ Google Photos...</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Đang tải ảnh từ Google Photos...</p>
               </div>
             ) : myFiles.length > 0 ? (
               <>
                 <div className="flex items-center justify-between mt-6 mb-4">
-                  <h2 className="text-lg font-medium text-gray-800">
-                    Ảnh của bạn <span className="text-gray-400 font-normal">({myFiles.length})</span>
+                  <h2 className="text-lg font-medium text-gray-800 dark:text-gray-100">
+                    Ảnh của bạn <span className="text-gray-400 dark:text-gray-500 font-normal">({myFiles.length})</span>
                   </h2>
                   <div className="flex gap-2">
 
                     <button
                       onClick={() => fetchMyFiles(true)}
-                      className="text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-full transition-colors"
+                      className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950 px-3 py-1.5 rounded-full transition-colors"
                     >
                       Làm mới
                     </button>
@@ -544,7 +549,7 @@ function PhotosApp() {
                   {myFiles.map(file => (
                     <div
                       key={file.id}
-                      className="relative aspect-square group rounded-xl overflow-hidden bg-gray-100 shadow-sm border border-gray-200 cursor-pointer"
+                      className="relative aspect-square group rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 cursor-pointer"
                       onClick={() => setPreviewFile(file)}
                     >
                       {file.thumbnailUrl ? (
@@ -556,7 +561,7 @@ function PhotosApp() {
                           onError={() => fetchMyFiles(false)}
                         />
                       ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-400 p-2 text-center">
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-500 p-2 text-center">
                           <svg className="w-8 h-8 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                           <span className="text-[10px] leading-tight font-medium text-red-500">Lỗi tải ảnh<br />(Thiếu quyền đọc)</span>
                         </div>
@@ -605,9 +610,9 @@ function PhotosApp() {
                 </div>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400">
-                <svg className="w-24 h-24 mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                <p className="text-lg font-medium text-gray-500">Chưa có ảnh nào</p>
+              <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400 dark:text-gray-500">
+                <svg className="w-24 h-24 mb-4 text-gray-200 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <p className="text-lg font-medium text-gray-500 dark:text-gray-400">Chưa có ảnh nào</p>
                 <p className="text-sm">Kéo thả ảnh vào đây để upload lên Google Photos</p>
               </div>
             )}
@@ -619,8 +624,8 @@ function PhotosApp() {
 
       {/* Google Photos Style Upload Manager */}
       {uploadManagerOpen && uploadJobs.length > 0 && (
-        <div className="fixed bottom-6 right-6 z-50 w-80 bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden flex flex-col transition-all duration-300">
-          <div className="bg-gray-800 px-4 py-3 flex items-center justify-between text-white">
+        <div className="fixed bottom-6 right-6 z-50 w-80 bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col transition-all duration-300">
+          <div className="bg-gray-800 dark:bg-gray-950 px-4 py-3 flex items-center justify-between text-white">
             <h3 className="text-sm font-medium">
               {uploadJobs.some(j => j.status === 'uploading' || j.status === 'pending')
                 ? `Đang tải lên ${uploadJobs.filter(j => j.status === 'success').length}/${uploadJobs.length} mục...`
@@ -635,9 +640,9 @@ function PhotosApp() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
-          <div className="max-h-64 overflow-y-auto p-2 bg-gray-50/50">
+          <div className="max-h-64 overflow-y-auto p-2 bg-gray-50/50 dark:bg-gray-950/50">
             {uploadJobs.map(job => (
-              <div key={job.id} className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-md transition-colors">
+              <div key={job.id} className="flex items-center gap-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors">
                 <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
                   {job.status === 'pending' && <svg className="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></svg>}
                   {job.status === 'uploading' && (
@@ -650,7 +655,7 @@ function PhotosApp() {
                   {job.status === 'error' && <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-700 truncate font-medium">{job.name}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-200 truncate font-medium">{job.name}</p>
                   {job.error && <p className="text-xs text-red-500 truncate mt-0.5">{job.error}</p>}
                 </div>
               </div>
@@ -666,7 +671,7 @@ function PhotosApp() {
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center text-blue-500 font-medium">Loading...</div>}>
+    <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-white dark:bg-gray-950 text-blue-500 font-medium">Loading...</div>}>
       <PhotosApp />
     </Suspense>
   );

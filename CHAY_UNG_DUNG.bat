@@ -61,12 +61,7 @@ echo   Backend: http://localhost:5000
 echo.
 echo Mo Chrome sau 5 giay...
 timeout /t 5 /nobreak >nul
-where chrome >nul 2>&1
-if errorlevel 1 (
-  start http://localhost:3001
-) else (
-  start chrome http://localhost:3001
-)
+call "%~dp0_mo_chrome.bat" "http://localhost:3001"
 echo.
 echo De tat ung dung: double-click TAT_UNG_DUNG.bat
 echo.
